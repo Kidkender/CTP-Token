@@ -9,13 +9,16 @@ contract Token is ERC20, Ownable {
         // Transaction tax rate in basis points (1% = 100 basis points)
         uint256 public transactionTaxRate ;
         address public receiveTax;
+        uint256 public poolReward;
 
         constructor(
+            address _inititalOwner,
             uint256 _inititalSupply, 
             uint256 _transactionTax, 
             address _receiveTax
             )
         ERC20("Carbon Token Proposals", "CTP")
+        Ownable(_inititalOwner)
         {
             _mint(msg.sender, _inititalSupply);
             transactionTaxRate = _transactionTax;
@@ -31,7 +34,7 @@ contract Token is ERC20, Ownable {
         }
 
         function setTransactionTaxRate(uint256 _newTaxRate) external onlyOwner {
-            require(newTaxRate<MAX_TAX_RATE, "Tax rate must be in basic point 0 - 10000");
+            require(_newTaxRate<MAX_TAX_RATE, "Tax rate must be in basic point 0 - 10000");
             transactionTaxRate = _newTaxRate;    
         }
 
@@ -39,13 +42,13 @@ contract Token is ERC20, Ownable {
             receiveTax = _newReceiveTax;
         }
 
-        function transfer(address to, amount) external returns (bool) {
-            
-            uint256 taxAmount = (amount * transactionTaxRate) / ;
+        function transfer(address to, uint256 amount) public virtual  override returns (bool) {
+            uint256 taxAmount = (amount * transactionTaxRate) / 10000;
             uint256 afterTaxAmount = amount - taxAmount;
-
-            require(_transfer(msg.sender, to, afterTaxAmount), "Token transfer failed.");
-            require(_transfer(msg.sender, afterTaxAmount, taxAmount), "Transfer to recipient failed.");
+            require(taxAmount>= 0, "tax Amount can not less 0");
+            poolReward += taxAmount;
+            require(super.transfer( to, afterTaxAmount), "Token transfer failed.");
+            
             return true;            
-        }        
+        }     
 }
