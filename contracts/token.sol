@@ -11,6 +11,9 @@ contract Token is ERC20, Ownable {
         address public receiveTax;
         uint256 public poolReward;
 
+        // Mapping to track timestamp 
+        mapping(address => uint256) private holderSince;
+
         constructor(
             address _inititalOwner,
             uint256 _inititalSupply, 
@@ -46,9 +49,31 @@ contract Token is ERC20, Ownable {
             uint256 taxAmount = (amount * transactionTaxRate) / 10000;
             uint256 afterTaxAmount = amount - taxAmount;
             require(taxAmount>= 0, "tax Amount can not less 0");
+
             poolReward += taxAmount;
             require(super.transfer( to, afterTaxAmount), "Token transfer failed.");
             
+            require(super.transfer( receiveTax, taxAmount), "Transfer to pool failed");    
+            
+            if (holderSince[to] == 0) {
+                holderSince[to] = block.timestamp;
+            }
+
             return true;            
+        }
+
+        function claimRewards() external returns (bool) {
+            require(holderSince[msg.sender] > 0, "Not a holder");
+            uint256 holdingDuration = block.timestamp - holderSince[msg.sender];
+            require(holdingDuration >= 30, "Not eligible for rewards yet");
+
+
+            uint256 rewards = holdingDuration / 1 minutes;
+
+            require(rewards <= poolReward, "Insufficient rewards in the pool");
+            super.transfer(receiveTax, msg.sender, rewards);
+            poolReward -= rewards;
+
+            return true;
         }     
 }
