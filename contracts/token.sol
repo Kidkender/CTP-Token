@@ -67,11 +67,10 @@ contract Token is ERC20, Ownable {
             uint256 holdingDuration = block.timestamp - holderSince[msg.sender];
             require(holdingDuration >= 30, "Not eligible for rewards yet");
 
-
             uint256 rewards = holdingDuration / 1 minutes;
 
             require(rewards <= poolReward, "Insufficient rewards in the pool");
-            super.transfer(receiveTax, msg.sender, rewards);
+            _transfer(receiveTax, msg.sender, rewards);
             poolReward -= rewards;
 
             return true;
