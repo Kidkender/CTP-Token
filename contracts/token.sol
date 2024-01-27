@@ -68,12 +68,17 @@ contract Token is ERC20, Ownable {
             require(holdingDuration >= 30, "Not eligible for rewards yet");
 
 
-            uint256 rewards = holdingDuration / 1 minutes;
+            uint256 rewards = holdingDuration / 1 days;
 
             require(rewards <= poolReward, "Insufficient rewards in the pool");
-            super.transfer(receiveTax, msg.sender, rewards);
+            _transfer(receiveTax, msg.sender, rewards);
             poolReward -= rewards;
 
             return true;
         }     
+
+        function rewardForValidEvidence(address recipient) external  {
+            require(recipient != address(0), "Address is not valid.");
+            super._mint(recipient, 100);
+        }
 }
