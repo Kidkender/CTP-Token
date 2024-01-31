@@ -4,9 +4,11 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import "@openzeppelin/contracts/utils/Nonces.sol";
 
-contract Token is ERC20, Ownable, ERC20Votes, ERC20Permit {
+contract Token is Ownable, ERC20, ERC20Permit, ERC20Votes {
+
         uint256 public constant MAX_TAX_RATE = 10000;
         // Transaction tax rate in basis points (1% = 100 basis points)
         uint256 public transactionTaxRate ;
